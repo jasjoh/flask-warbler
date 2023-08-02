@@ -129,7 +129,7 @@ def logout():
         flash("Logged Out Successfully", "success")
         return redirect("/")
 
-    flash("Invalid logout attempt", 'danger')
+    flash("Invalid request", 'danger')
 
     return redirect("/")
 
@@ -179,7 +179,7 @@ def show_following(user_id):
         return redirect("/")
 
     user = User.query.get_or_404(user_id)
-    breakpoint()
+
     return render_template('users/following.html', user=user)
 
 
@@ -201,16 +201,26 @@ def start_following(follow_id):
 
     Redirect to following page for the current for the current user.
     """
+    form = g.csrf_form
 
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    followed_user = User.query.get_or_404(follow_id)
-    g.user.following.append(followed_user)
-    db.session.commit()
+    # breakpoint()
 
-    return redirect(f"/users/{g.user.id}/following")
+    if form.validate_on_submit():
+
+        followed_user = User.query.get_or_404(follow_id)
+        flash(f"Sucessfully following {followed_user.username}", "success")
+        g.user.following.append(followed_user)
+        db.session.commit()
+
+        return redirect(f"/users/{g.user.id}/following")
+
+    flash("Invalid request", 'danger')
+
+    return redirect("/")
 
 
 @app.post('/users/stop-following/<int:follow_id>')
@@ -219,16 +229,25 @@ def stop_following(follow_id):
 
     Redirect to following page for the current for the current user.
     """
+    form = g.csrf_form
 
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    followed_user = User.query.get_or_404(follow_id)
-    g.user.following.remove(followed_user)
-    db.session.commit()
 
-    return redirect(f"/users/{g.user.id}/following")
+    if form.validate_on_submit():
+
+        followed_user = User.query.get_or_404(follow_id)
+        flash(f"Sucessfully unfollowed {followed_user.username}", "success")
+        g.user.following.remove(followed_user)
+        db.session.commit()
+
+        return redirect(f"/users/{g.user.id}/following")
+
+    flash("Invalid request", 'danger')
+
+    return redirect("/")
 
 
 @app.route('/users/profile', methods=["GET", "POST"])
