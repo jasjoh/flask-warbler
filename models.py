@@ -142,7 +142,7 @@ class User(db.Model):
 
         return False
 
-    # TODO: We can change these two methods to be 'user in self.followers'
+    # TODO: We can change these two methods to be 'other_user in self.followers'
     def is_followed_by(self, other_user):
         """Is this user followed by `other_user`?"""
 
@@ -150,12 +150,16 @@ class User(db.Model):
             user for user in self.followers if user == other_user]
         return len(found_user_list) == 1
 
+        # return other_user in self.followers
+
     def is_following(self, other_user):
         """Is this user following `other_use`?"""
 
         found_user_list = [
             user for user in self.following if user == other_user]
         return len(found_user_list) == 1
+
+        # return other_user in self.following
 
 
 class Message(db.Model):
