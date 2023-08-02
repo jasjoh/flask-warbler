@@ -32,9 +32,17 @@ def add_user_to_g():
     """If we're logged in, add curr user to Flask global."""
 
     if CURR_USER_KEY in session:
-        # g is specific to this to request / response cycle
-        # g is ALWAYS passed to every template
+
         g.user = User.query.get(session[CURR_USER_KEY])
+
+        # g is specific to this to request / response cycle
+        # g is gone and recreated with every request
+        # (why its in before_request route)
+        # g is ALWAYS passed to every template
+        # dont have to say user=user
+        # session[CURRE_USER_KEY] gives us back user.id
+        # When we do User.query.get, gives us a user instance,
+        # and store in g.user
 
     else:
         g.user = None
@@ -395,6 +403,12 @@ def homepage():
     if g.user:
         messages = (Message
                     .query
+                    .filter(db.or_(
+                            Message.user_id == g.user.id,
+                            Message.user_id.in_(
+                                [user.id for user in g.user.following]
+                            )
+                    ))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
