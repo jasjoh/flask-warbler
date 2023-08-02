@@ -92,6 +92,8 @@ class User(db.Model):
     followers = db.relationship(
         "User",
         secondary="follows",
+        # this is about more explicit with SQL Alchemy about how to join
+        # equivalent to: ...
         primaryjoin=(Follow.user_being_followed_id == id),
         secondaryjoin=(Follow.user_following_id == id),
         backref="following",
@@ -140,6 +142,7 @@ class User(db.Model):
 
         return False
 
+    # TODO: We can change these two methods to be 'user in self.followers'
     def is_followed_by(self, other_user):
         """Is this user followed by `other_user`?"""
 

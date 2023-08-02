@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from forms import UserAddForm, LoginForm, MessageForm
+from forms import UserAddForm, LoginForm, MessageForm, CSRFForm
 from models import db, connect_db, User, Message
 
 load_dotenv()
@@ -15,7 +15,7 @@ CURR_USER_KEY = "curr_user"
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-app.config['SQLALCHEMY_ECHO'] = False
+app.config['SQLALCHEMY_ECHO'] = True
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
 app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 toolbar = DebugToolbarExtension(app)
@@ -32,11 +32,15 @@ def add_user_to_g():
     """If we're logged in, add curr user to Flask global."""
 
     if CURR_USER_KEY in session:
+        # g is specific to this to request / response cycle
+        # g is ALWAYS passed to every template
         g.user = User.query.get(session[CURR_USER_KEY])
 
     else:
         g.user = None
 
+    # define CSRF Form
+    g.csrf_form = CSRFForm()
 
 def do_login(user):
     """Log in user."""
@@ -64,6 +68,9 @@ def signup():
     """
 
     do_logout()
+
+    # TODO: Need to update navbar after logout. Should probably do inside
+    # the logout method.
 
     form = UserAddForm()
 
@@ -117,9 +124,14 @@ def logout():
 
     form = g.csrf_form
 
-    # IMPLEMENT THIS AND FIX BUG
-    # DO NOT CHANGE METHOD ON ROUTE
+    if form.validate_on_submit():
+        do_logout()
+        flash("Logged Out Successfully", "success")
+        return redirect("/")
 
+    flash("Invalid logout attempt", 'danger')
+
+    return redirect("/")
 
 ##############################################################################
 # General user routes:
@@ -167,6 +179,7 @@ def show_following(user_id):
         return redirect("/")
 
     user = User.query.get_or_404(user_id)
+    breakpoint()
     return render_template('users/following.html', user=user)
 
 
