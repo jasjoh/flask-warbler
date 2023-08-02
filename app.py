@@ -6,7 +6,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm, UserEditForm, CSRFForm
-from models import db, connect_db, User, Message
+from models import db, connect_db, User, Message, Like
 
 load_dotenv()
 
@@ -29,8 +29,8 @@ connect_db(app)
 
 @app.before_request
 def add_user_to_g():
-    """If we're logged in, add curr user to Flask global."""
-#TODO: change docstring
+    """Create reference to CSRF Form and ff we're logged in ...
+    add curr user to Flask global."""
     if CURR_USER_KEY in session:
 
         g.user = User.query.get(session[CURR_USER_KEY])
@@ -209,13 +209,11 @@ def start_following(follow_id):
 
     Redirect to following page for the current for the current user.
     """
-    form = g.csrf_form
-    #TODO: move line 212 below
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    # breakpoint()
+    form = g.csrf_form
 
     if form.validate_on_submit():
 
@@ -237,12 +235,12 @@ def stop_following(follow_id):
 
     Redirect to following page for the current for the current user.
     """
-    form = g.csrf_form
 
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
+    form = g.csrf_form
 
     if form.validate_on_submit():
 
@@ -299,12 +297,11 @@ def delete_user():
 
     Redirect to signup page.
     """
-    form = g.csrf_form
-
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
+    form = g.csrf_form
 
     if form.validate_on_submit():
 
@@ -364,11 +361,12 @@ def delete_message(message_id):
     Check that this message was written by the current user.
     Redirect to user page on success.
     """
-    form = g.csrf_form
 
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
+
+    form = g.csrf_form
 
     if form.validate_on_submit():
 

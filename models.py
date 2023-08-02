@@ -99,6 +99,11 @@ class User(db.Model):
         backref="following",
     )
 
+    liked_messages = db.relationship(
+        'Message',
+        secondary='likes',
+        backref='liked_by')
+
     def __repr__(self):
         return f"<User #{self.id}: {self.username}, {self.email}>"
 
@@ -189,6 +194,25 @@ class Message(db.Model):
         nullable=False,
     )
 
+
+class Like(db.Model):
+    """A user like of a message ("warble")."""
+
+    __tablename__ = 'likes'
+
+    message_id = db.Column(
+        db.Integer,
+        db.ForeignKey('messages.id'),
+        primary_key=True,
+        nullable=False
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+        primary_key=True,
+        nullable=False
+    )
 
 def connect_db(app):
     """Connect this database to provided Flask app.
