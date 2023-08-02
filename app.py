@@ -263,18 +263,25 @@ def delete_user():
 
     Redirect to signup page.
     """
+    form = g.csrf_form
 
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    do_logout()
 
-    db.session.delete(g.user)
-    db.session.commit()
+    if form.validate_on_submit():
 
-    return redirect("/signup")
+        do_logout()
 
+        db.session.delete(g.user)
+        db.session.commit()
+
+        return redirect("/signup")
+
+    flash("Invalid request", 'danger')
+
+    return redirect("/")
 
 ##############################################################################
 # Messages routes:
@@ -321,16 +328,28 @@ def delete_message(message_id):
     Check that this message was written by the current user.
     Redirect to user page on success.
     """
+    form = g.csrf_form
 
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    msg = Message.query.get_or_404(message_id)
-    db.session.delete(msg)
-    db.session.commit()
+    if form.validate_on_submit():
 
-    return redirect(f"/users/{g.user.id}")
+        msg = Message.query.get_or_404(message_id)
+
+        if g.user.id == msg.user_id:
+
+            db.session.delete(msg)
+            db.session.commit()
+        else:
+            flash("Access Unauthorized", 'danger')
+
+        return redirect(f"/users/{g.user.id}")
+
+    flash("Invalid request", 'danger')
+
+    return redirect("/")
 
 
 ##############################################################################
