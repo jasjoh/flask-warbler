@@ -10,11 +10,11 @@
 **Work Items**
 
 1. Add a Like model. **DONE**
-2. Add stars to message cards.
--- /messages/show.html
--- /users/show.html
--- /home.html
+2. Add stars to message cards. **DONE**
+-- /messages/show.html **DONE**
+-- /users/show.html  **DONE**
+-- /home.html **DONE**
 3. Update 'Likes' count on profile page.
 4. Create a profile view where only liked messages show.
-5. Add POST view function for liking / un-liking a star.
+5. Add POST view function for liking / un-liking a star. **DONE**
 6. Add a GET view function for displaying starred messages on profile.

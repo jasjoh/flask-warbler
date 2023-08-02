@@ -385,6 +385,41 @@ def delete_message(message_id):
 
     return redirect("/")
 
+@app.post('/messages/<int:message_id>/toggle_like')
+def toggle_like(message_id):
+    """ Toggle like status of a message and refresh the page. """
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    message = Message.query.get_or_404(message_id)
+
+    destination = f'/{request.args["page"]}'
+
+    form = g.csrf_form
+
+    if form.validate_on_submit():
+
+        # double check the message isn't owned by the current user
+        if message in g.user.messages:
+            # message is owned by user - not allowed; redirect back to home
+            flash("Error: Cannot like own messages.", 'danger')
+            return redirect(destination)
+
+        # toggle like status
+        if message in g.user.liked_messages:
+            g.user.liked_messages.remove(message)
+        else:
+            g.user.liked_messages.append(message)
+
+        db.session.commit()
+
+        return redirect(destination)
+
+    flash("Invalid request", 'danger')
+    return redirect(destination)
+
 
 ##############################################################################
 # Homepage and error pages

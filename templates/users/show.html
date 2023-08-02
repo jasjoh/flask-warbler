@@ -6,7 +6,6 @@
     {% for message in user.messages %}
 
     <li class="list-group-item">
-      <a href="/messages/{{ message.id }}" class="message-link"></a>
 
       <a href="/users/{{ user.id }}">
         <img src="{{ user.image_url }}"
@@ -19,12 +18,31 @@
         <span class="text-muted">
           {{ message.timestamp.strftime('%d %B %Y') }}
         </span>
-        {% if g.user %}
-        <i class="Fav-star bi bi-star-fill"></i>
-        {% else %}
-        <i class="Fav-star bi bi-star"> </i>
+        <!-- check if the current message was not authored by current user -->
+        {% if not message in g.user.messages %}
+          <form method="POST"
+          action="/messages/{{message.id }}/toggle_like?page=users%2F{{ user.id }}"
+          id="toggle_star_form"
+          style="display:inline; margin-left: 5px;">
+
+            {{ g.csrf_form.hidden_tag() }}
+
+            <button style="background:none; border:none;">
+              <!-- check if this message is liked by the current user -->
+              {% if message in g.user.liked_messages %}
+              <i class="Fav-star bi bi-star-fill"></i>
+              {% else %}
+              <i class="Fav-star bi bi-star"></i>
+              {% endif %}
+            </button>
+
+          </form>
         {% endif %}
-        <p>{{ message.text }}</p>
+
+        <a href="/messages/{{ message.id }}">
+          <p>{{ message.text }}</p>
+        </a>
+
       </div>
     </li>
 

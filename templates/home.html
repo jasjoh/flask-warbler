@@ -48,14 +48,37 @@
       <ul class="list-group" id="messages">
         {% for msg in messages %}
           <li class="list-group-item">
-            <a href="/messages/{{ msg.id }}" class="message-link"/>
             <a href="/users/{{ msg.user.id }}">
               <img src="{{ msg.user.image_url }}" alt="" class="timeline-image">
             </a>
             <div class="message-area">
               <a href="/users/{{ msg.user.id }}">@{{ msg.user.username }}</a>
               <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
-              <p>{{ msg.text }}</p>
+
+              <!-- check if the current message was not authored by current user -->
+              {% if not msg in g.user.messages %}
+              <form method="POST"
+              action="/messages/{{msg.id }}/toggle_like?page="
+              id="toggle_star_form"
+              style="display:inline; margin-left: 5px;">
+
+                {{ g.csrf_form.hidden_tag() }}
+
+                <button style="background:none; border:none;">
+                  <!-- check if this message is liked by the current user -->
+                  {% if msg in g.user.liked_messages %}
+                  <i class="Fav-star bi bi-star-fill"></i>
+                  {% else %}
+                  <i class="Fav-star bi bi-star"></i>
+                  {% endif %}
+                </button>
+
+              </form>
+              {% endif %}
+
+              <a href="/messages/{{ msg.id }}">
+                <p>{{ msg.text }}</p>
+              </a>
             </div>
           </li>
         {% endfor %}
