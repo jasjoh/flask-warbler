@@ -41,10 +41,20 @@ class UserModelTestCase(TestCase):
         """Test to see if is_following works.
         Testing if u1 is following u2, but also if u2 is not following u1"""
 
+        breakpoint()
+
         u1 = User.query.get(self.u1_id)
         u2 = User.query.get(self.u2_id)
 
         u2.followers.append(u1) #  u1.following.append(u2) same statements
+
+        print(f"\n\n\nu2.followers:", u2.followers, f"\n\n\n")
+        print(f"\n\n\nu1.is_following:", u2.is_following, f"\n\n\n")
+
+        db.session.commit()
+
+        print(f"\n\n\nu2.followers:", u2.followers, f"\n\n\n")
+        print(f"\n\n\nu1.is_following:", u2.is_following, f"\n\n\n")
 
         #TODO: should we be committing and testing data from DB?
 
@@ -137,4 +147,69 @@ class UserModelTestCase(TestCase):
         u1 = User.authenticate(username="u1",  password="bob")
 
         self.assertFalse(u1)
+
+    def test_toggle_like_success(self):
+        """ Tests to make sure that a message can liked and un-liked. """
+
+        m1 = Message(text="Message 1 Text", user_id=self.u1_id)
+
+        u2 = User.query.get(self.u2_id)
+
+        # toggle like so that m1 is liked by u2
+        u2.toggle_like(m1)
+        self.assertTrue(m1 in u2.liked_messages)
+
+        # toggle like so that m1 is no longer liked by u2
+        u2.toggle_like(m1)
+        self.assertFalse(m1 in u2.liked_messages)
+
+    def test_toggle_like_fail(self):
+        """ Tests to make sure message owner can't like their own messages. """
+
+        m1 = Message(text="Message 1 Text", user_id=self.u1_id)
+
+        #  -- Flask MEM: [M1]
+        #  -- Flask-DB-SESSION: []
+        #  -- PostgreSQL-DB-SESSION []
+        #  -- DB-DATA [U1, U2]
+
+        print(f"\n\n\nMessage 1:\n\n\n", m1)
+
+        u1 = User.query.get(self.u1_id)
+
+        #  -- Flask MEM: [M1, U1]
+        #  -- Flask-DB-SESSION: []
+        #  -- PostgreSQL-DB-SESSION []
+        #  -- DB-DATA [U1, U2]
+
+        # u1.message asks the DB - it does NOT rely on local instance
+        print(f"\n\n\nUser 1 messages Pre-Commit:\n\n\n", u1.messages)
+
+        db.session.add(m1)
+
+        #  -- Flask MEM: [M1, U1]
+        #  -- Flask-DB-SESSION: [Add M1]
+        #  -- PostgreSQL-DB-SESSION []
+        #  -- DB-DATA [U1, U2]
+
+        db.session.commit()
+
+        # flush()
+        #  -- Flask MEM: [M1, U1]
+        #  -- Flask-DB-SESSION: []
+        #  -- PostgreSQL-DB-SESSION [Add M1]
+        #  -- DB-DATA [U1, U2]
+
+        # commit()
+        #  -- Flask MEM: [M1, U1]
+        #  -- Flask-DB-SESSION: []
+        #  -- PostgreSQL-DB-SESSION []
+        #  -- DB-DATA [U1, U2, M1]
+
+        print(f"\n\n\nUser 1 messages Post-Commit:\n\n\n", u1.messages)
+
+        # try to have u1 like their own message
+        self.assertFalse(u1.toggle_like(m1))
+        self.assertFalse(m1 in u1.liked_messages)
+
 
