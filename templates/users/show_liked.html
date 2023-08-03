@@ -1,0 +1,53 @@
+{% extends 'users/detail.html' %}
+{% block user_details %}
+<div class="col-sm-6">
+  <ul class="list-group" id="messages">
+
+    {% for message in user.liked_messages %}
+
+    <li class="list-group-item">
+
+      <a href="/users/{{ user.id }}">
+        <img src="{{ user.image_url }}"
+             alt="user image"
+             class="timeline-image">
+      </a>
+
+      <div class="message-area">
+        <a href="/users/{{ user.id }}">@{{ user.username }}</a>
+        <span class="text-muted">
+          {{ message.timestamp.strftime('%d %B %Y') }}
+        </span>
+        <!-- check if the current message was not authored by current user -->
+        {% if not message in g.user.messages %}
+          <form method="POST"
+          action="/messages/{{message.id }}/toggle_like?page=users%2F{{ user.id }}/liked_messages"
+          id="toggle_star_form"
+          style="display:inline; margin-left: 5px;">
+
+            {{ g.csrf_form.hidden_tag() }}
+
+            <button style="background:none; border:none;">
+              <!-- check if this message is liked by the current user -->
+              {% if message in g.user.liked_messages %}
+              <i class="Fav-star bi bi-star-fill"></i>
+              {% else %}
+              <i class="Fav-star bi bi-star"></i>
+              {% endif %}
+            </button>
+
+          </form>
+        {% endif %}
+
+        <a href="/messages/{{ message.id }}">
+          <p>{{ message.text }}</p>
+        </a>
+
+      </div>
+    </li>
+
+    {% endfor %}
+
+  </ul>
+</div>
+{% endblock %}
