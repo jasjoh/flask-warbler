@@ -30,7 +30,7 @@ connect_db(app)
 @app.before_request
 def add_user_to_g():
     """If we're logged in, add curr user to Flask global."""
-
+#TODO: change docstring
     if CURR_USER_KEY in session:
 
         g.user = User.query.get(session[CURR_USER_KEY])
@@ -210,7 +210,7 @@ def start_following(follow_id):
     Redirect to following page for the current for the current user.
     """
     form = g.csrf_form
-
+    #TODO: move line 212 below
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
