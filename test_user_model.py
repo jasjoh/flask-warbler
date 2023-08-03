@@ -48,15 +48,9 @@ class UserModelTestCase(TestCase):
 
         u2.followers.append(u1) #  u1.following.append(u2) same statements
 
-        print(f"\n\n\nu2.followers:", u2.followers, f"\n\n\n")
-        print(f"\n\n\nu1.is_following:", u2.is_following, f"\n\n\n")
-
+        # Even though technically we don't appear to need to commit, we should
+        # still be committing when we make a change via line 49 (.append())
         db.session.commit()
-
-        print(f"\n\n\nu2.followers:", u2.followers, f"\n\n\n")
-        print(f"\n\n\nu1.is_following:", u2.is_following, f"\n\n\n")
-
-        #TODO: should we be committing and testing data from DB?
 
         self.assertTrue(u1.is_following(u2))
         self.assertFalse(u2.is_following(u1))
@@ -71,6 +65,10 @@ class UserModelTestCase(TestCase):
 
         u2.followers.append(u1)
 
+        # Even though technically we don't appear to need to commit, we should
+        # still be committing when we make a change via line 49 (.append())
+        db.session.commit()
+
         self.assertFalse(u1.is_followed_by(u2))
         self.assertTrue(u2.is_followed_by(u1))
 
@@ -84,6 +82,10 @@ class UserModelTestCase(TestCase):
             password='newuserpassword',
             image_url='',
             )
+
+        # Even though technically we don't appear to need to commit, we should
+        # still be committing when we make a change via line 49 (.append())
+        db.session.commit()
 
         self.assertEqual(User.query.count(), 3)
 
@@ -157,10 +159,18 @@ class UserModelTestCase(TestCase):
 
         # toggle like so that m1 is liked by u2
         u2.toggle_like(m1)
+
+        # Even though technically we don't appear to need to commit, we should
+        # still be committing when we make a change via line 49 (.append())
+        db.session.commit()
         self.assertTrue(m1 in u2.liked_messages)
 
         # toggle like so that m1 is no longer liked by u2
         u2.toggle_like(m1)
+
+        # Even though technically we don't appear to need to commit, we should
+        # still be committing when we make a change via line 49 (.append())
+        db.session.commit()
         self.assertFalse(m1 in u2.liked_messages)
 
     def test_toggle_like_fail(self):
