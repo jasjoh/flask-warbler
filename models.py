@@ -159,6 +159,7 @@ class User(db.Model):
         # return other_user in self.followers
 
     def is_following(self, other_user):
+
         """Is this user following `other_use`?"""
 
         found_user_list = [
@@ -167,6 +168,22 @@ class User(db.Model):
 
         # return other_user in self.following
 
+    def toggle_like(self, message):
+        """ Toggles the like status of a message for this user.
+        If the user owns this message, does not toggle and returns false. """
+
+        # if message is owned by user, return False
+        if message in self.messages:
+            return False
+
+        # user doesn't own message, so we're good to toggle
+        if message in self.liked_messages:
+            self.liked_messages.remove(message)
+        else:
+            self.liked_messages.append(message)
+
+        # return True since we were able to toggle
+        return True
 
 class Message(db.Model):
     """An individual message ("warble")."""

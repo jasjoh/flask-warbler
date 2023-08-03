@@ -413,17 +413,24 @@ def toggle_like(message_id):
 
     if form.validate_on_submit():
 
-        # double check the message isn't owned by the current user
-        if message in g.user.messages:
+        # # TODO: We could potentially abstract this into the model akin to
+        # # is_following() / is_followed_by
+        # # double check the message isn't owned by the current user
+        # if message in g.user.messages:
+        #     # message is owned by user - not allowed; redirect back to home
+        #     flash("Error: Cannot like own messages.", 'danger')
+        #     return redirect(destination)
+
+        # # toggle like status
+        # if message in g.user.liked_messages:
+        #     g.user.liked_messages.remove(message)
+        # else:
+        #     g.user.liked_messages.append(message)
+
+        if not g.user.toggle_like(message):
             # message is owned by user - not allowed; redirect back to home
             flash("Error: Cannot like own messages.", 'danger')
             return redirect(destination)
-
-        # toggle like status
-        if message in g.user.liked_messages:
-            g.user.liked_messages.remove(message)
-        else:
-            g.user.liked_messages.append(message)
 
         db.session.commit()
 
