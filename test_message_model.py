@@ -17,15 +17,31 @@ class MessageModelTestCase(TestCase):
     def setUp(self):
         User.query.delete()
 
+
+
         u1 = User.signup("u1", "u1@email.com", "password", None)
-        u2 = User.signup("u2", "u2@email.com", "password", None)
+
 
         db.session.commit()
+
         self.u1_id = u1.id
-        self.u2_id = u2.id
+
+        m1 = Message(text="new message", user_id=self.u1_id)
+
+
+        db.session.add(m1)
+        db.session.commit()
+
+        self.m1_id = m1.id
+
 
     def tearDown(self):
         db.session.rollback()
 
-    # Basic test of creating a warble (message) and ensuring it's there
-    # Test you can find the
+
+    def test_user_model(self):
+        m1 = Message.query.get(self.m1_id)
+
+        # User should have no messages & no followers
+        self.assertEqual(Message.query.count(), 1)
+        self.assertEqual(m1.text, "new message")
