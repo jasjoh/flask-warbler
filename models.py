@@ -98,6 +98,7 @@ class User(db.Model):
         secondaryjoin=(Follow.user_following_id == id),
         backref="following",
     )
+    #TODO: refer to backref as property or attribute?
 
     liked_messages = db.relationship(
         'Message',

@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm, UserEditForm, CSRFForm
 from models import db, connect_db, User, Message, Like
+from werkzeug.exceptions import Unauthorized
 
 load_dotenv()
 
@@ -18,7 +19,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
 app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
-toolbar = DebugToolbarExtension(app)
+# toolbar = DebugToolbarExtension(app)
 
 connect_db(app)
 
@@ -427,9 +428,9 @@ def toggle_like(message_id):
         db.session.commit()
 
         return redirect(destination)
-
-    flash("Invalid request", 'danger')
-    return redirect(destination)
+# TODO: use unauthorize
+    # flash("Invalid request", 'danger')
+    raise Unauthorized()
 
 
 ##############################################################################
